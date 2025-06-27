@@ -11,9 +11,9 @@ export default function Index(): JSX.Element | null {
   useEffect(() => {
     if (!isLoading) {
       if (isAuthenticated) {
-        router.replace('/(tabs)/dashboard');
+        router.replace('/tabs/dashboard');
       } else {
-        router.replace('/(auth)/signin');
+        router.replace('/auth/signin');
       }
     }
   }, [isAuthenticated, isLoading]);

@@ -28,7 +28,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [transactions, setTransactions] = useState<Transaction[]>([
     {
       id: '1',
-      date: '2025-06-25',
+      date: new Date(),
       amount: 50.00,
       description: 'Grocery Shopping',
       location: 'Walmart',
@@ -37,7 +37,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     },
     {
       id: '2',
-      date: '2025-06-24',
+      date: new Date(),
       amount: 1200.00,
       description: 'Salary Deposit',
       location: 'Bank Transfer',

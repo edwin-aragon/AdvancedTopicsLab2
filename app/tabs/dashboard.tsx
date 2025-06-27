@@ -22,7 +22,7 @@ export default function Dashboard(): JSX.Element {
           style: 'destructive',
           onPress: async () => {
             await signOut();
-            router.replace('/(auth)/signin');
+            router.replace('/auth/signin');
           }
         },
       ]
@@ -93,7 +93,7 @@ export default function Dashboard(): JSX.Element {
           <Text style={globalStyles.subtitle}>Recent Transactions</Text>
           <TouchableOpacity 
             style={[globalStyles.button, { paddingVertical: 8, paddingHorizontal: 16 }]}
-            onPress={() => router.push('/(tabs)/add-transaction')}
+            onPress={() => router.push('/tabs/add-transaction')}
           >
             <Text style={[globalStyles.buttonText, { fontSize: 14 }]}>Add Transaction</Text>
           </TouchableOpacity>

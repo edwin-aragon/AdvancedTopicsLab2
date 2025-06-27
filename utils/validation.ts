@@ -3,7 +3,7 @@ import { Transaction, ValidationResult, TransactionType } from '../types';
 export const validateTransaction = (transaction: Partial<Transaction>): ValidationResult => {
   const errors: Record<string, string> = {};
 
-  if (!transaction.date || transaction.date.trim() === '') {
+  if (!transaction.date || transaction.toString().trim() === '') {
     errors.date = 'Date is required';
   }
 
@@ -40,7 +40,7 @@ export const formatCurrency = (amount: number): string => {
   }).format(amount);
 };
 
-export const formatDate = (dateString: string): string => {
+export const formatDate = (dateString: any): string => {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',

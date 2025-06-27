@@ -1,15 +1,16 @@
 import React, { JSX, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, Platform } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 import { FormInput } from '../../components/FormInput';
 import { globalStyles, colors } from '../../styles/globalStyles';
 import { validateTransaction } from '../../utils/validation';
-import { Transaction, TransactionType, TransactionCategory } from '../../types';
+import { TransactionType, TransactionCategory } from '../../types';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 interface FormData {
-  date: string;
+  date: Date;
   amount: string;
   description: string;
   location: string;
@@ -18,71 +19,103 @@ interface FormData {
 }
 
 export default function AddTransaction(): JSX.Element {
-  const [formData, setFormData] = useState<FormData>({
-    date: new Date().toISOString().split('T')[0],
+  const initialFormData: FormData = {
+    date: new Date(),
     amount: '',
     description: '',
     location: '',
     type: '',
     category: '',
-  });
+  };
+  const [formData, setFormData] = useState<FormData>(initialFormData);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+
+  const showDatePicker = () => setDatePickerVisibility(true);
+  const hideDatePicker = () => setDatePickerVisibility(false);
   const { addTransaction } = useAuth();
   const router = useRouter();
 
   const transactionTypes: TransactionType[] = ['Credit', 'Debit', 'Refund'];
   const categories: TransactionCategory[] = ['Shopping', 'Travel', 'Utility', 'Food', 'Entertainment', 'Income', 'Other'];
 
-  const handleInputChange = (field: keyof FormData, value: string): void => {
+  const handleInputChange = (field: keyof FormData, value: any): void => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
 
-  const handleSubmit = (): void => {
-  // Create a properly typed object for validation
-  const transactionData = {
-    date: formData.date,
-    amount: parseFloat(formData.amount),
-    description: formData.description,
-    location: formData.location,
-    type: formData.type || undefined,
-    category: formData.category || undefined,
+  // When confirming the date, store as a Date object
+  const handleConfirm = (date: Date) => {
+    setFormData(prev => ({ ...prev, date }));;
+    hideDatePicker();
   };
 
-  const validation = validateTransaction(transactionData);
-  
-  if (!validation.isValid) {
-    setErrors(validation.errors);
-    Alert.alert('Validation Error', 'Please correct the highlighted fields');
-    return;
-  }
-
-  try {
-    const newTransaction = addTransaction({
+  const handleSubmit = (): void => {
+    // Prepare the transaction data for validation and saving
+    const transactionData = {
       date: formData.date,
       amount: parseFloat(formData.amount),
       description: formData.description,
       location: formData.location,
-      type: formData.type as TransactionType, // Safe to cast here after validation
-      category: formData.category as TransactionCategory, // Safe to cast here after validation
-    });
-    
-    Alert.alert(
-      'Success',
-      'Transaction added successfully!',
-      [
-        {
-          text: 'OK',
-          onPress: () => router.back(),
-        },
-      ]
-    );
-  } catch (error) {
-    Alert.alert('Error', 'Failed to add transaction');
-  }
-};
+      type: formData.type || undefined,
+      category: formData.category || undefined,
+    };
+
+    const validation = validateTransaction(transactionData);
+
+    if (!validation.isValid) {
+      setErrors(validation.errors);
+      Alert.alert('Validation Error', 'Please correct the highlighted fields');
+      return;
+    }
+
+    try {
+      addTransaction({
+        date: transactionData.date,
+        amount: parseFloat(formData.amount),
+        description: formData.description,
+        location: formData.location,
+        type: formData.type as TransactionType,
+        category: formData.category as TransactionCategory,
+      });
+
+      setFormData(initialFormData); // Reset form
+      setErrors({});
+      Alert.alert(
+        'Success',
+        'Transaction added successfully!',
+        [
+          {
+            text: 'OK',
+            onPress: () => router.back(),
+          },
+        ]
+      );
+    } catch (error) {
+      Alert.alert('Error', 'Failed to add transaction');
+    }
+  };
+
+  const handleAmountChange = (value: string) => {
+    // Allow only digits and a single decimal point
+    let filtered = value.replace(/[^0-9.]/g, '');
+
+    // Only allow one decimal point
+    const firstDot = filtered.indexOf('.');
+    if (firstDot !== -1) {
+      filtered =
+        filtered.slice(0, firstDot + 1) +
+        filtered.slice(firstDot + 1).replace(/\./g, '');
+    }
+
+    // Optional: Prevent leading "."
+    if (filtered.startsWith('.')) filtered = '0' + filtered;
+
+    setFormData(prev => ({ ...prev, amount: filtered }));
+    if (errors.amount) setErrors(prev => ({ ...prev, amount: '' }));
+  };
 
   return (
     <View style={globalStyles.container}>
@@ -105,20 +138,42 @@ export default function AddTransaction(): JSX.Element {
       </View>
 
       <ScrollView style={{ flex: 1, padding: 16 }}>
-        <FormInput
-          label="Date"
-          value={formData.date}
-          onChangeText={(value) => handleInputChange('date', value)}
-          placeholder="YYYY-MM-DD"
-          error={errors.date}
-        />
+        {/* Date Picker */}
+        <View style={{ marginVertical: 8 }}>
+          <Text style={{ fontSize: 16, fontWeight: '500', color: colors.text, marginBottom: 4 }}>
+            Date
+          </Text>
+          <TouchableOpacity
+            style={[
+              globalStyles.input,
+              { justifyContent: 'center', minHeight: 50 }
+            ]}
+            onPress={showDatePicker}
+            activeOpacity={0.8}
+          >
+            <Text style={{ fontSize: 16, color: colors.text }}>
+              {formData.date.toLocaleDateString('en-CA')}
+            </Text>
+          </TouchableOpacity>
+          <DateTimePickerModal
+            isVisible={isDatePickerVisible}
+            mode="date"
+            date={formData.date}
+            onConfirm={handleConfirm}
+            onCancel={hideDatePicker}
+            maximumDate={new Date()}
+            themeVariant="light"
+            textColor="#000"
+          />
+          {errors.date && <Text style={globalStyles.errorText}>{errors.date}</Text>}
+        </View>
 
         <FormInput
           label="Amount"
           value={formData.amount}
-          onChangeText={(value) => handleInputChange('amount', value)}
+          onChangeText={(value) => handleAmountChange(value)}
           placeholder="0.00"
-          keyboardType="numeric"
+          keyboardType={Platform.OS === 'ios' ? 'default' : 'numeric'}
           error={errors.amount}
         />
 

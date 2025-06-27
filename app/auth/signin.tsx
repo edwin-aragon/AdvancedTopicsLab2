@@ -22,7 +22,7 @@ export default function SignIn(): JSX.Element {
     try {
       const result = await signIn(username, password);
       if (result.success) {
-        router.replace('/(tabs)/dashboard');
+        router.replace('/tabs/dashboard');
       } else {
         Alert.alert('Error', result.error || 'Invalid credentials');
       }
@@ -70,11 +70,11 @@ export default function SignIn(): JSX.Element {
             </Text>
           </TouchableOpacity>
           
-          <View style={{ marginTop: 24, padding: 16, backgroundColor: colors.background, borderRadius: 8 }}>
+          {/* <View style={{ marginTop: 24, padding: 16, backgroundColor: colors.background, borderRadius: 8 }}>
             <Text style={{ textAlign: 'center', color: colors.textSecondary, fontSize: 14 }}>
               Demo Credentials:{'\n'}Username: admin{'\n'}Password: admin
             </Text>
-          </View>
+          </View> */}
         </View>
       </View>
     </KeyboardAvoidingView>

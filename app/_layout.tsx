@@ -7,8 +7,8 @@ export default function RootLayout(): JSX.Element {
     <AuthProvider>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
-        <Stack.Screen name="(auth)/signin" />
-        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="auth/signin" />
+        <Stack.Screen name="tabs" />
         <Stack.Screen name="transaction-details/[id]" />
       </Stack>
     </AuthProvider>

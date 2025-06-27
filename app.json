@@ -1,6 +1,7 @@
 {
   "expo": {
     "name": "ExpenseTracker",
+    "scheme": "ExpenseTracker",
     "slug": "ExpenseTracker",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -20,7 +21,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.yourcompany.expensetracker"
     },
     "web": {
       "favicon": "./assets/favicon.png"
